@@ -14,7 +14,7 @@ class Category(models.Model):
 class Listing(models.Model):
     title = models.CharField(max_length=300)
     description = models.CharField(max_length=500)
-    starting_bid = models.FloatField(default=0.0)
+    bid = models.FloatField(default=0.0)
     img_url = models.CharField(max_length=1000)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
     is_available = models.BooleanField(default=True)
