@@ -1,7 +1,18 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>{{ message }}</h2>
+    {% if show_listings == False %}
+    <div class="d-flex mx-5 justify-content-center">
+        {% for core in Category %}
+            <form action="{% url 'core_list' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="core" value="{{ core.category_core }}">
+              <input type="submit" class="btn btn-primary mx-3" value="{{ core.category_core }}">
+            </form>
+        {% endfor %}
+        </div>
+    {% else %}
+    <h2>Wands with {{ core }} core</h2>
     <div class="row mx-13">
         {% for listing in listings %}
         <div class="card mb-3 mx-auto" style="max-height: 350px;">
@@ -25,4 +36,5 @@
         <h2>No Listing Yet...</h2>
         {% endfor %}
     </div>
+    {% endif %}
 {% endblock %}

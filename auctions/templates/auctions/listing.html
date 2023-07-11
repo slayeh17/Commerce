@@ -1,0 +1,82 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <div class="d-flex justify-content-between">
+        <h2>{{ listing.title }}</h2>
+        {% if update == True %}
+            <div class="alert alert-success" role="alert">
+                Bid Placed!
+            </div>
+        {% elif update == False %}
+            <div class="alert alert-danger" role="alert">
+                Bid must be higher than current price
+            </div>
+        {% endif %}
+        {% if is_owner and listing.is_available == True %}
+            <form action="{% url 'close_listing' id=listing.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Close Listing" class="btn btn-danger">
+            </form>
+        {% elif listing.is_available == False %}
+            <h4 class="alert alert-danger">Listing Closed</h4>
+        {% endif %}
+        {% if user.is_authenticated %}
+            {% if in_watchlist %}
+            <form action="{% url 'remove_watchlist' id=listing.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" name="watchlist_btn" value="True" class="btn btn-secondary">Remove from watchlist</button>
+            </form>
+            {% else %}
+            <form action="{% url 'add_watchlist' id=listing.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" name="watchlist_btn" value="False" class="btn btn-success">Add to watchlist</button>
+            </form>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if listing.is_available == False and request.user == bidder %}
+        <h1 class="alert alert-success text-center">Congratulations {{ bidder }}! You have Won. 🥳</h1>
+    {% elif listing.is_available == False %}
+        <h1 class="aler alert-success text-center">{{ bidder }} has won!🥳</h1>
+    {% endif %}
+    <div class="d-flex justify-content-between align-items-center">
+        <img src="{{ listing.img_url }}" alt="{{ listing.title }}" style="max-width: 500px;">
+        <div class="mx-5">
+            <p class="text-justify">{{ listing.description }}</p>
+            <div class="d-flex justify-content-between">
+                <h3><strong>Current Price: ${{ listing.bid.bid }}</strong></h3>
+                {% if user.is_authenticated and not is_owner and listing.is_available %}
+                <form action="{% url 'bid' id=listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="number" name="bid_price" min="0" placeholder="Enter your price" class="py-2">
+                    <input type="submit" class="btn btn-primary" value="Place Bid">
+                </form>
+                {% endif %}
+            </div>
+            <h6>Owner: {{ listing.owner }}</h6>
+            {% if listing.owner != bidder %}
+            <p>Highest Bidder: {{ bidder }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% if user.is_authenticated %}
+    <form action="{% url 'comment' id=listing.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-floating">
+            <textarea class="form-control" name="comment_text" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
+        </div>
+        <input class="btn btn-primary my-3 float-right" type="submit" value="Comment">
+    </form>
+    {% endif %}
+    <div class="mt-5 pt-3">
+        <hr>
+        <h5>Comments</h5>
+        {% for comment in comments %}
+        <div class="form-floating mb-3">
+            <textarea class="form-control" id="floatingTextareaDisabled" disabled>{{ comment.author }}: {{ comment.comment_text }}</textarea>
+        </div>
+        {% empty %}
+        <h6>No comments yet...</h6>
+        {% endfor %}
+    </div>
+{% endblock %}
